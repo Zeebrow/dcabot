@@ -1,0 +1,6 @@
+# venv stuff
+lib/
+lib64/
+__pychache__/
+bin/
+include/
