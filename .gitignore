@@ -2,5 +2,11 @@
 lib/
 lib64/
 __pychache__/
+*__pychache__/
+*backup*
+*bkup*
+*.conf
+etc/*
+test/*
 bin/
 include/
