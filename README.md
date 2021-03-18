@@ -4,6 +4,8 @@ $1.00 fee on a $5.00 order in the Gemini app! Ridiculous!
 
 Meanwhile, Gemini API charges a taker fee of 0.35% - That's $0.0175. And that's the highest the fee goes. Wow.
 
+I could use Robinhood for "free crypto trades", but you don't actually own any crypto you buy with their platform. I'm not about that.
+
 ## Plan
 - Use bot to daily buy $X of crypto
 - Periodically add USD from bank
