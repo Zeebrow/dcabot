@@ -12,36 +12,29 @@ import logging
 
 # main.py
 # k.i.s.s. (LOL)
-
-if sys.argv[1] == 'cron':
-    automated_tx = True
-
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-
-logfile_path = 'dcabot.log'
-global _is_test
-if 'test' in sys.argv:
-    _is_test = True
-    log_format = logging.Formatter( '--TEST--%(asctime)s - %(name)s - %(levelname)s - %(message)s' )
-else:
-    _is_test = False
-    log_format = logging.Formatter( '%(asctime)s - %(name)s - %(levelname)s - %(message)s' )
-
-fh = logging.FileHandler(logfile_path)
-sh = logging.StreamHandler()
-
-sh.setFormatter(log_format)
-fh.setFormatter(log_format)
-
-logger.addHandler(fh)
-logger.addHandler(sh)
-
-logger.info("Starting DCABot")
-
 ###
 # These need to be moved out into their own module!
 #
+
+global _is_test
+
+if 'test' in sys.argv:
+    _is_test = True
+    log_format = logging.Formatter( '--TEST--%(asctime)s - %(name)s - %(levelname)s - %(message)s' )# TODO set in constants.py
+else:
+    _is_test = False
+    log_format = logging.Formatter( '%(asctime)s - %(name)s - %(levelname)s - %(message)s' )# TODO set in constants.py
+
+logger = logging.getLogger()
+
+#logger.setLevel(logging.DEBUG)  
+#logfile_path = 'dcabot.log' # TODO set in constants.py
+#fh = logging.FileHandler(logfile_path)
+#sh = logging.StreamHandler()
+#sh.setFormatter(log_format)
+#fh.setFormatter(log_format)
+#logger.addHandler(fh)
+#logger.addHandler(sh)
 
 def place_buy(auth_client, currency, amount):
     currency = currency.upper()
@@ -74,41 +67,96 @@ def confirm_order(auth_client, order_id):
     return o
 
 
-def main():
-    if automated_tx:
-        logger.debug("This was run from cron.")
+def test():
+
+    logger.setLevel(logging.DEBUG)  
+    logfile_path = 'dcabot.log' # TODO set in constants.py
+    sh = logging.StreamHandler()
+    sh.setFormatter(log_format)
+    logger.addHandler(sh)
+    logger.info(" in test() - Testing DCABot")
     if(not config_utils.check_files_exist()):
         raise FileNotFoundError("Configuration file not found.")
     
     tracked_currencies = conf.get_tracked_currencies()
-    
-    threshold_daily_buy = conf.threshold_daily_buy
-    if _is_test:
-        threshold_daily_buy = 999999.0
-    btcusd_daily_buy = conf.btcusd_daily_buy
-    ethusd_daily_buy = conf.ethusd_daily_buy
-    bchusd_daily_buy = conf.bchusd_daily_buy
+    threshold_daily_buy = 42069.1337
+    btcusd_daily_buy = 0.0
+    ethusd_daily_buy = 0.0
+    bchusd_daily_buy = 0.0
     total_sought_usd = btcusd_daily_buy + ethusd_daily_buy + bchusd_daily_buy
-
-    usd_balance = 0.0
     
     auth_client = SM.SecretsManager().cbpro_auth_client()
     all_accounts = auth_client.get_accounts()
     
+    usd_balance = 0.0
     for acct in all_accounts:
         if (acct['currency'] == "USD"):
             usd_balance = float(acct['balance'])
-
+            logger.debug("Ignoring actual account balance for testing.")
+            logger.info(f"Ignoring actual account balance for testing: ${usd_balance:.2f}")
+    usd_balance = 696969.420
     logger.info(f"Avalable balance to trade: ${usd_balance:.2f}")
-#    if (usd_balance < usd_low_balance_alert)
     if (usd_balance > threshold_daily_buy):
         if (usd_balance < total_sought_usd):
             logger.error(f"Insufficient funds to buy! \nUSD balance:\t${usd_balance}\nTotal sought:\t${total_sought_usd:.2f}")
+            # TODO:
             # email(fail_msg)
             exit(1)
         for curr_amt_pair in tracked_currencies:
             this_buy = place_buy(auth_client, curr_amt_pair[0], curr_amt_pair[1])
-            sleep(0.05)
+            sleep(0.05) # I dunno y
+            if ( this_buy ):
+                _confirm = confirm_order(auth_client, this_buy['id'])
+                if (not _confirm):
+                    logger.error("Oh shit. Your order was placed successfully, but we can't confirm that it went through.")
+                else:
+                    logger.info(f"Successfully bought ${curr_amt_pair[1]} of {curr_amt_pair[0]}")
+
+    else:
+        logger.error(f"Insufficient funds! (balance: ${usd_balance:.2f}, threshold balance: ${threshold_daily_buy:.2f})")
+        exit(1)
+def main():
+
+    logger.setLevel(logging.INFO)  
+    logfile_path = 'dcabot.log' # TODO set in constants.py
+    fh = logging.FileHandler(logfile_path)
+    sh = logging.StreamHandler()
+    sh.setFormatter(log_format)
+    fh.setFormatter(log_format)
+    logger.addHandler(fh)
+    logger.addHandler(sh)
+    logger.info("Starting DCABot")
+
+    if _is_test:
+        threshold_daily_buy = 999999.0
+
+    if(not config_utils.check_files_exist()):
+        raise FileNotFoundError("Configuration file not found.")
+    
+    tracked_currencies = conf.get_tracked_currencies()
+    threshold_daily_buy = conf.threshold_daily_buy
+    btcusd_daily_buy = conf.btcusd_daily_buy
+    ethusd_daily_buy = conf.ethusd_daily_buy
+    bchusd_daily_buy = conf.bchusd_daily_buy
+    total_sought_usd = btcusd_daily_buy + ethusd_daily_buy + bchusd_daily_buy
+    
+    auth_client = SM.SecretsManager().cbpro_auth_client()
+    all_accounts = auth_client.get_accounts()
+    
+    usd_balance = 0.0
+    for acct in all_accounts:
+        if (acct['currency'] == "USD"):
+            usd_balance = float(acct['balance'])
+    logger.info(f"Avalable balance to trade: ${usd_balance:.2f}")
+    if (usd_balance > threshold_daily_buy):
+        if (usd_balance < total_sought_usd):
+            logger.error(f"Insufficient funds to buy! \nUSD balance:\t${usd_balance}\nTotal sought:\t${total_sought_usd:.2f}")
+            # TODO:
+            # email(fail_msg)
+            exit(1)
+        for curr_amt_pair in tracked_currencies:
+            this_buy = place_buy(auth_client, curr_amt_pair[0], curr_amt_pair[1])
+            sleep(0.05) # I dunno y
             if ( this_buy ):
                 _confirm = confirm_order(auth_client, this_buy['id'])
                 if (not _confirm):
@@ -129,10 +177,10 @@ This script is found in {} and run in /etc/cron.daily.
         if (not _is_test):
             email(email_message)
 
-        exit()
-
-
-
+        exit(1)
 
 if __name__ == '__main__':
-    main()
+    if 'test' in sys.argv:
+        test()
+    else:
+        main()

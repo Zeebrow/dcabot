@@ -4,7 +4,8 @@ import sys
 import logging
 
 logger = logging.getLogger(__name__)
-
+TRUE_STRINGS = ['Y', 'YES', 'TRUE' '1']
+FALSE_STRINGS = ['N', 'NO', 'FALSE', '0']
 DEFAULT_CONFIG_FILEPATH = "/home/mike/bin/dcabot/dcabot/etc/dcabot.conf"
 
 # Configuration
@@ -63,6 +64,7 @@ def trigger_low_bal_alert(low_bal_level: str, current_balance: float, daily_buy_
 
 
 ## General
+usd_low_balance_alert = float(config['general']['usd_low_balance_alert'])
 threshold_daily_buy = float(config['general']['threshold_daily_buy'])
 dcabot_home = config['general']['home_dir']
 ## BTC-USD
@@ -71,9 +73,21 @@ btcusd_daily_buy = float(config['btc-usd']['daily_buy'])
 ## ETH-USD
 ethusd_daily_buy = float(config['eth-usd']['daily_buy'])
 
+## BCH-USD
+bchusd_daily_buy = float(config['bch-usd']['daily_buy'])
+
 ## Email
 email_to = config['email']['email_to']
 email_from = config['email']['email_from']
+
+send_email_notifications = config['email']['send_email_notifications']
+if send_email_notifications.upper() in TRUE_STRINGS:
+    send_email_notifications = True
+elif send_email_notifications.upper() in FALSE_STRINGS:
+    send_email_notifications = False
+else:
+    logging.warn(f"Could not read config value '{send_email_notifications}' for send_email_notifications. Setting to 'no' and proceeding.")
+    send_email_notifications = False
 
 ## Logging
 info_log = config['logging']['info_log']
@@ -87,7 +101,8 @@ logger.debug(f"email_to :{email_to}")
 logger.debug(f"email_from :{email_from}")
 logger.debug(f"info_log :{info_log}")
 logger.debug(f"error_log :{error_log}")
-
+logger.debug(f"send_email_notifications: {send_email_notifications}")
+logger.debug(f"usd_low_balance_alert: {usd_low_balance_alert}")
 
 if __name__ == '__main__':
     print()

@@ -1,25 +1,13 @@
 tmp/
-secrets.py
-secrets
-etc/dcabot.log
+**/secrets*
+**/*.log
 var/
 rnd/
-backup/*
-
+backup*
+**/*.swp
 
 # venv stuff
-*lib*
-*lib64*
-__pychache__/
-*__pychache__/
-src/*/__pycache__/
-*backup*
-*bkup*
-*.conf
-etc/*
-test/*
-bin/
-include/
+venv/
 # vs code
 settings.json
 
