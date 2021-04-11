@@ -4,6 +4,8 @@ secrets
 etc/dcabot.log
 var/
 rnd/
+backup/*
+
 
 # venv stuff
 *lib*
