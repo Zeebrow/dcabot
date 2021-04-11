@@ -6,8 +6,27 @@ Meanwhile, Gemini API charges a taker fee of 0.35% - That's $0.0175. And that's 
 
 I could use Robinhood for "free crypto trades", but you don't actually own any crypto you buy with their platform. I'm not about that.
 
-## Plan
+## Overview
 - Use bot to daily buy $X of crypto
-- Periodically add USD from bank
-	- Simultaneously move same amount of crypto to hardware wallet if tx fees are acceptable
-- Track changes to crypto balance
+
+# Tech
+The purpose of this project is to learn various tech (on top of accumulating crypto). For lack of a better title, this is an overview of the tools used in the project, in the context of how I'm learning about them.
+For example, I understand "logging" isn't what you might think of as a tool, but it is something I'm learning how to do with Python. So I included it in as a tech topic.
+
+## Python 3
+Topics:
+- Directory and file structure
+- Best-practices for coding
+- Logging
+- Configuration and secrets management
+
+## ELK stack integration
+To give me a head start for things I will be working with professionally.
+Topics:
+- Elasticsearch
+	- Parse logs to build a searchable database of information. E.g. Search through a list of all buy orders, and return the price each was bought at.
+	- NOTE: add line `-Djava.net.preferIPv4Stack=true` in jvm.options
+- Logstash
+	- Using a Logstash custom logging.Handler to write logs directly to Logstash. 
+- Kibana
+	- ???

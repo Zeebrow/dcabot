@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import cbpro, json, requests, sys
 import os.path
+import sys
 from time import sleep
 from datetime import datetime
 from dca_config import config as conf
@@ -12,11 +13,21 @@ import logging
 # main.py
 # k.i.s.s. (LOL)
 
+if sys.argv[1] == 'cron':
+    automated_tx = True
+
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 logfile_path = 'dcabot.log'
-log_format = logging.Formatter( '%(asctime)s - %(name)s - %(levelname)s - %(message)s' )
+global _is_test
+if 'test' in sys.argv:
+    _is_test = True
+    log_format = logging.Formatter( '--TEST--%(asctime)s - %(name)s - %(levelname)s - %(message)s' )
+else:
+    _is_test = False
+    log_format = logging.Formatter( '%(asctime)s - %(name)s - %(levelname)s - %(message)s' )
+
 fh = logging.FileHandler(logfile_path)
 sh = logging.StreamHandler()
 
@@ -27,6 +38,10 @@ logger.addHandler(fh)
 logger.addHandler(sh)
 
 logger.info("Starting DCABot")
+
+###
+# These need to be moved out into their own module!
+#
 
 def place_buy(auth_client, currency, amount):
     currency = currency.upper()
@@ -60,15 +75,20 @@ def confirm_order(auth_client, order_id):
 
 
 def main():
+    if automated_tx:
+        logger.debug("This was run from cron.")
     if(not config_utils.check_files_exist()):
         raise FileNotFoundError("Configuration file not found.")
     
     tracked_currencies = conf.get_tracked_currencies()
-
+    
     threshold_daily_buy = conf.threshold_daily_buy
+    if _is_test:
+        threshold_daily_buy = 999999.0
     btcusd_daily_buy = conf.btcusd_daily_buy
     ethusd_daily_buy = conf.ethusd_daily_buy
-    total_sought_usd = btcusd_daily_buy + ethusd_daily_buy
+    bchusd_daily_buy = conf.bchusd_daily_buy
+    total_sought_usd = btcusd_daily_buy + ethusd_daily_buy + bchusd_daily_buy
 
     usd_balance = 0.0
     
@@ -80,7 +100,7 @@ def main():
             usd_balance = float(acct['balance'])
 
     logger.info(f"Avalable balance to trade: ${usd_balance:.2f}")
-
+#    if (usd_balance < usd_low_balance_alert)
     if (usd_balance > threshold_daily_buy):
         if (usd_balance < total_sought_usd):
             logger.error(f"Insufficient funds to buy! \nUSD balance:\t${usd_balance}\nTotal sought:\t${total_sought_usd:.2f}")
@@ -105,7 +125,10 @@ Your daily trade was not executed because your USD balance ({}) is below your pr
 -dcabot
 This script is found in {} and run in /etc/cron.daily.
 """.format(usd_balance, threshold_daily_buy, sys.argv[0])
-        email(email_message)
+        
+        if (not _is_test):
+            email(email_message)
+
         exit()
 
 

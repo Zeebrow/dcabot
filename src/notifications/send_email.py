@@ -5,7 +5,7 @@ from dca_config import SecretsManager as sm
 import logging
 
 logger = logging.getLogger(__name__)
-
+send_email_notifications = True
 # AWS SES
 secrets = sm.SecretsManager()
 EMAIL_FROM = 'dcabot@mzborowski.com'
@@ -22,9 +22,13 @@ def email(msg,
         smtp_port=SMTP_PORT,
         ses_username=ses_username,
         ses_password=ses_password):
-    
+
+    if (not send_email_notifications):
+        logger.info(f"Stopped email from being sent (_is_test = {_is_test}, send_email_notifications = {send_email_notifications}")
+        return
+
     try:
-        logging.debug("Attempting to conect to server...")
+        logger.debug("Attempting to conect to server...")
         context = ssl.create_default_context()
         server = smtplib.SMTP(smtp_host, smtp_port)
         server.ehlo()
