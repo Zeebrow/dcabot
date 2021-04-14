@@ -71,9 +71,12 @@ def test():
 
     logger.setLevel(logging.DEBUG)  
     logfile_path = 'dcabot.log' # TODO set in constants.py
+    fh = logging.FileHandler(logfile_path)
     sh = logging.StreamHandler()
     sh.setFormatter(log_format)
+    fh.setFormatter(log_format)
     logger.addHandler(sh)
+    logger.addHandler(fh)
     logger.info(" in test() - Testing DCABot")
     if(not config_utils.check_files_exist()):
         raise FileNotFoundError("Configuration file not found.")
