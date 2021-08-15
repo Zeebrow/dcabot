@@ -8,6 +8,7 @@ from dca_config import config as conf
 from dca_config import config_utils
 from notifications.send_email import email
 from dca_config import SecretsManager as SM
+from constants import *
 import logging
 
 # main.py
@@ -26,15 +27,6 @@ else:
     log_format = logging.Formatter( '%(asctime)s - %(name)s - %(levelname)s - %(message)s' )# TODO set in constants.py
 
 logger = logging.getLogger()
-
-#logger.setLevel(logging.DEBUG)  
-#logfile_path = 'dcabot.log' # TODO set in constants.py
-#fh = logging.FileHandler(logfile_path)
-#sh = logging.StreamHandler()
-#sh.setFormatter(log_format)
-#fh.setFormatter(log_format)
-#logger.addHandler(fh)
-#logger.addHandler(sh)
 
 def place_buy(auth_client, currency, amount):
     currency = currency.upper()
