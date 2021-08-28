@@ -43,13 +43,3 @@ Topics:
 - Logging
 - Configuration and secrets management
 
-## ELK stack integration
-To give me a head start for things I will be working with professionally.
-Topics:
-- Elasticsearch
-	- Parse logs to build a searchable database of information. E.g. Search through a list of all buy orders, and return the price each was bought at.
-	- NOTE: add line `-Djava.net.preferIPv4Stack=true` in jvm.options
-- Logstash
-	- Using a Logstash custom logging.Handler to write logs directly to Logstash. 
-- Kibana
-	- ???
